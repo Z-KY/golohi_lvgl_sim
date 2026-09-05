@@ -147,3 +147,30 @@ After every implementation step:
 
 Do not attempt the entire UI in one change.
 Implement milestone-by-milestone.
+
+## Technical baseline
+
+Target simulator:
+- Linux/WSL
+- SDL2
+- CMake
+- 320x240 landscape
+- LVGL v9.4.0
+- LVGL software renderer
+
+Future embedded target:
+- ESP32-S3
+- ESP-IDF
+- 320x240 touch LCD
+- RGB565
+
+Shared code:
+- src/app/
+- src/ui/
+- src/assets/
+
+PC-only code:
+- src/hal/
+- SDL-specific input/display implementation
+
+Shared app/ui code must not depend on SDL.
