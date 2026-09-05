@@ -1,0 +1,2027 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Golohi Fitness Companion — Touchscreen UI Prototype</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --on: #4ee6a6;
+            --on-2: #2a9e77;
+            --on-3: #163a2e;
+            --bg: #04070a;
+            --shell: #0b0f0d;
+            --shell-edge: #1c2a24;
+            --panel: #0a0e0c;
+            --panel-2: #0e1410;
+            --panel-3: #12201a;
+            --line: #173328;
+            --txt: var(--on);
+            --muted: var(--on-2);
+            --muted-2: #1d4a3a;
+            --accent: var(--on);
+            --accent-2: var(--on-2);
+            --accent-grad: var(--on);
+            --warn: var(--on);
+            --danger: var(--on);
+            --ok: var(--on);
+            --person: #7fdcb6;
+            --font: 'DotGothic16', 'Share Tech Mono', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--txt);
+            font-family: var(--font);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 22px;
+            padding: 26px 12px 40px;
+            min-height: 100%;
+        }
+
+        .stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .device {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            padding: 16px;
+            border-radius: 20px;
+            background: var(--shell);
+            border: 1px solid var(--shell-edge);
+            box-shadow: 0 18px 40px -20px #000;
+        }
+
+        .brand-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 8px 0;
+        }
+
+        .brand-row .logo {
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            font-size: 13px;
+            background: var(--accent-grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .brand-row .unit {
+            font-size: 9px;
+            color: var(--muted-2);
+            letter-spacing: .4px;
+        }
+
+        .body {
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .screen {
+            position: relative;
+            width: 320px;
+            height: 240px;
+            flex: 0 0 320px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #000;
+            box-shadow: inset 0 0 0 2px #0c1118;
+        }
+
+        .screen::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 26;
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, .22) 2px 3px);
+        }
+
+        .page {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            padding: 10px;
+            background: #000;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        .statusbar {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 9px;
+            color: var(--muted);
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .statusbar .spacer {
+            flex: 1;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 5px;
+            border-radius: 14px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            font-size: 8px;
+            color: var(--muted);
+        }
+
+        .chip.on {
+            color: var(--accent);
+            border-color: rgba(40, 224, 160, .4);
+        }
+
+        .chip svg {
+            width: 11px;
+            height: 11px;
+            flex: none;
+        }
+
+        .bat-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 9px;
+            color: var(--txt);
+        }
+
+        .bat {
+            width: 18px;
+            height: 9px;
+            border: 1.5px solid var(--muted);
+            border-radius: 2px;
+            position: relative;
+            padding: 1px;
+        }
+
+        .bat::after {
+            content: "";
+            position: absolute;
+            right: -3px;
+            top: 2px;
+            width: 2px;
+            height: 4px;
+            background: var(--muted);
+            border-radius: 1px;
+        }
+
+        .bat i {
+            display: block;
+            height: 100%;
+            background: var(--accent);
+            border-radius: 1px;
+        }
+
+        .bat.low i {
+            background: var(--danger);
+        }
+
+        .bat.low {
+            border-color: var(--danger);
+            animation: blink 1s steps(2, start) infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: .35;
+            }
+        }
+
+        .home-card-wrap {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 0;
+        }
+
+        .big-card {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            cursor: pointer;
+            transition: transform .12s;
+        }
+
+        .big-card:active {
+            transform: scale(.985);
+        }
+
+        .big-card.mode {
+            background: var(--accent-grad);
+            border-color: transparent;
+        }
+
+        .big-card.locked {
+            opacity: .5;
+        }
+
+        .big-card .bc-ico {
+            font-size: 92px;
+            line-height: 1;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .big-card .bc-ico svg {
+            width: 104px;
+            height: 104px;
+        }
+
+        .big-card.mode .bc-ico svg {
+            color: #04231a;
+        }
+
+        .big-card:not(.mode) .bc-ico svg {
+            color: var(--accent);
+        }
+
+        .big-card .bc-name {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .big-card.mode .bc-ico,
+        .big-card.mode .bc-name {
+            color: #04231a;
+        }
+
+        .dots {
+            display: flex;
+            gap: 7px;
+            justify-content: center;
+            padding: 3px 0 1px;
+        }
+
+        .dots i {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--muted-2);
+            transition: background .15s;
+        }
+
+        .dots i.on {
+            background: var(--accent);
+        }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(4, 6, 9, .74);
+            backdrop-filter: blur(2px);
+            z-index: 30;
+            padding: 12px;
+        }
+
+        .overlay.active {
+            display: flex;
+        }
+
+        .sheet {
+            width: 100%;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 11px;
+            box-shadow: 0 18px 36px -16px rgba(0, 0, 0, .7);
+        }
+
+        .sheet h3 {
+            margin: 0 0 8px;
+            font-size: 12px;
+        }
+
+        .mode-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            max-height: 150px;
+            overflow: auto;
+        }
+
+        .mode-say {
+            font-size: 11px;
+            color: var(--accent);
+            text-align: center;
+            letter-spacing: .5px;
+            min-height: 14px;
+            margin: 0 0 8px;
+            opacity: 0;
+            transition: opacity .15s;
+        }
+
+        .mode-say.show {
+            opacity: 1;
+        }
+
+        .mode-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 7px 4px;
+            border-radius: 10px;
+            background: var(--panel-2);
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .mode-item .mi-ico {
+            width: 46px;
+            height: 46px;
+            border-radius: 8px;
+            background: var(--panel-3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mode-item .mi-ico svg {
+            width: 40px;
+            height: 40px;
+            color: var(--on);
+        }
+
+        .mode-item .mi-name {
+            font-size: 10px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .mode-item .mi-desc {
+            font-size: 7px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .mode-item.sel {
+            border-color: var(--accent);
+            background: #13211c;
+        }
+
+        .seg {
+            display: flex;
+            gap: 5px;
+        }
+
+        .seg button {
+            flex: 1;
+            padding: 8px 3px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--panel-2);
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .seg button.on {
+            background: var(--accent-grad);
+            color: #04231a;
+            border-color: transparent;
+        }
+
+        .lvl-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        .lvl-val {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--txt);
+        }
+
+        .dialog {
+            text-align: center;
+        }
+
+        .dialog .ico {
+            width: 44px;
+            height: 44px;
+            margin: 2px auto 7px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .dialog .ico.warn {
+            background: var(--on);
+            color: #000;
+        }
+
+        .dialog .ico.danger {
+            background: var(--on);
+            color: #000;
+        }
+
+        .dialog .ico.ok {
+            background: var(--on);
+            color: #000;
+        }
+
+        .dialog h3 {
+            margin: 0 0 5px;
+            font-size: 13px;
+        }
+
+        .dialog p {
+            margin: 0 0 11px;
+            font-size: 10px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .btn-2 {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-2 button {
+            flex: 1;
+            padding: 9px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid var(--line);
+        }
+
+        .btn-ghost {
+            background: var(--panel-2);
+            color: var(--txt);
+        }
+
+        .btn-primary {
+            background: var(--accent-grad);
+            color: #04231a;
+            border-color: transparent;
+        }
+
+        .cap {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .diagram-box {
+            flex: 1;
+            min-height: 0;
+            border-radius: 8px;
+            background: #04060a;
+            border: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .diagram-box svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .diag-bar {
+            height: 4px;
+            background: #1b2430;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .diag-bar i {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: var(--accent-grad);
+        }
+
+        .hint {
+            font-size: 9px;
+            color: var(--muted);
+            text-align: center;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        /* setup diagram: distance + install-height shown as big, glanceable chips */
+        .diag-vals {
+            display: flex;
+            gap: 8px;
+            margin-top: 7px;
+        }
+
+        .diag-val {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            background: var(--panel-2);
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            padding: 8px 4px;
+        }
+
+        .dv-ico {
+            font-size: 18px;
+            line-height: 1;
+            color: var(--accent);
+        }
+
+        .dv-num {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--on);
+            letter-spacing: .3px;
+        }
+
+        /* dedicated settings pages — big, minimal, readable at ~1 m */
+        .set-page {
+            flex-direction: column;
+        }
+
+        .set-center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+        }
+
+        .set-icon {
+            font-size: 32px;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .set-icon svg {
+            width: 46px;
+            height: 46px;
+        }
+
+        .set-big {
+            font-size: 34px;
+            font-weight: 800;
+            color: var(--on);
+            font-family: var(--font);
+            letter-spacing: 1px;
+        }
+
+        .set-big.off {
+            color: var(--muted-2);
+        }
+
+        .set-bar {
+            display: flex;
+            gap: 5px;
+            width: 176px;
+            height: 18px;
+            touch-action: none;
+            cursor: pointer;
+        }
+
+        .set-bar i {
+            flex: 1;
+            background: var(--on-3);
+            border: 1px solid var(--line);
+            border-radius: 2px;
+        }
+
+        .set-bar i.on {
+            background: var(--on);
+            border-color: var(--on);
+        }
+
+        .set-step {
+            display: flex;
+            gap: 20px;
+            margin-top: 2px;
+        }
+
+        .step-btn {
+            width: 58px;
+            height: 42px;
+            border-radius: 11px;
+            border: 1px solid var(--accent);
+            background: rgba(40, 224, 160, .14);
+            color: var(--accent);
+            font-size: 24px;
+            font-weight: 800;
+            line-height: 1;
+            cursor: pointer;
+            font-family: var(--font);
+            -webkit-touch-callout: none;
+        }
+
+        .step-btn:active {
+            background: rgba(40, 224, 160, .32);
+            transform: translateY(1px);
+        }
+
+        .skip {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 9px;
+            color: var(--accent-2);
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .calib-center {
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* calibration ring: progress as a ring around an intuitive action icon */
+        .calib-ring {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ring {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .ring circle {
+            fill: none;
+            stroke-width: 6;
+        }
+
+        .ring-bg {
+            stroke: #1b2430;
+        }
+
+        .ring-fg {
+            stroke: var(--on);
+            stroke-linecap: round;
+            stroke-dasharray: 339.292;
+            stroke-dashoffset: 339.292;
+            transition: stroke-dashoffset .25s linear;
+        }
+
+        .calib-ico {
+            position: relative;
+            width: 84px;
+            height: 84px;
+            color: var(--on);
+        }
+
+        .calib-ico svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .calib-check {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 56px;
+            font-weight: 800;
+            color: var(--on);
+        }
+
+        .calib-ring.done .calib-ico {
+            opacity: .22;
+        }
+
+        .calib-ring.done .calib-check {
+            display: flex;
+        }
+
+        .radar-sweep {
+            transform-origin: 50px 50px;
+            animation: radarSpin 2.2s linear infinite;
+        }
+
+        @keyframes radarSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* BT sync page reuses the ring at a smaller size to fit the action button */
+        .calib-ring.sm {
+            width: 104px;
+            height: 104px;
+        }
+
+        .calib-ring.sm .calib-ico {
+            width: 58px;
+            height: 58px;
+        }
+
+        .calib-ring.sm .calib-check {
+            font-size: 40px;
+        }
+
+        .calib-ring.spin .ring {
+            animation: btSpin 1.1s linear infinite;
+        }
+
+        @keyframes btSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* inline, icon-led calibration warning — auto-retries, no manual button needed */
+        .calib-warn {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            background: rgba(4, 7, 10, .86);
+            border-radius: 16px;
+            z-index: 6;
+        }
+
+        .calib-warn.show {
+            display: flex;
+            animation: warnIn .2s ease;
+        }
+
+        @keyframes warnIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .cw-ico {
+            width: 86px;
+            height: 86px;
+            color: var(--on);
+            animation: cwPulse 1.4s ease-in-out infinite;
+        }
+
+        .cw-ico svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        @keyframes cwPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: .92
+            }
+
+            50% {
+                transform: scale(1.08);
+                opacity: 1
+            }
+        }
+
+        .cw-cap {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--on);
+            letter-spacing: .3px;
+        }
+
+        .cw-hint {
+            font-size: 9px;
+            color: var(--muted);
+        }
+
+        #bt .set-center {
+            gap: 8px;
+        }
+
+        .bt-action {
+            height: 38px;
+            width: 186px;
+            max-width: 84%;
+            border-radius: 11px;
+            border: 1px solid var(--accent);
+            background: rgba(40, 224, 160, .16);
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            letter-spacing: 1px;
+            margin-top: 1px;
+        }
+
+        .bt-action:disabled {
+            opacity: .5;
+            cursor: default;
+            background: rgba(40, 224, 160, .07);
+        }
+
+        .countdown {
+            font-size: 96px;
+            font-weight: 800;
+            background: var(--accent-grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .count-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .count-num {
+            font-size: 96px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -3px;
+            background: var(--accent-grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            transition: transform .12s;
+        }
+
+        .count-num.bump {
+            transform: scale(1.1);
+        }
+
+        .count-timer {
+            font-size: 13px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .form-tip {
+            margin-top: 6px;
+            min-height: 24px;
+            padding: 5px 10px;
+            border-radius: 9px;
+            max-width: 90%;
+            background: rgba(78, 230, 166, .1);
+            color: var(--on);
+            font-size: 9px;
+            text-align: center;
+            border: 1px solid var(--on-3);
+            opacity: 0;
+            transition: opacity .2s;
+        }
+
+        .form-tip.show {
+            opacity: 1;
+        }
+
+        .stop-btn {
+            height: 40px;
+            border-radius: 11px;
+            border: 1px solid var(--danger);
+            background: rgba(78, 230, 166, .14);
+            color: var(--on);
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .count-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .stop-btn.pause {
+            border-color: var(--accent);
+            background: rgba(40, 224, 160, .12);
+            color: var(--accent);
+        }
+
+        .charge-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .charge-anim {
+            width: 104px;
+            height: 104px;
+            border-radius: 50%;
+            border: 5px solid #1b2430;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .charge-anim i {
+            position: absolute;
+            inset: -5px;
+            border-radius: 50%;
+            border: 5px solid transparent;
+            border-top-color: var(--accent);
+            animation: spin 1.4s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .charge-anim .cv {
+            position: relative;
+            z-index: 2;
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .boot {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 40;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 11px;
+            background: #000;
+        }
+
+        .boot.active {
+            display: flex;
+        }
+
+        .boot .b-logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            background: var(--accent-grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: pop .8s ease;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(.6);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .boot .b-bar {
+            width: 100px;
+            height: 3px;
+            border-radius: 3px;
+            background: #15202c;
+            overflow: hidden;
+        }
+
+        .boot .b-bar i {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: var(--accent-grad);
+            animation: load 1.8s ease forwards;
+        }
+
+        @keyframes load {
+            to {
+                width: 100%;
+            }
+        }
+
+        .sleep {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 35;
+            background: #000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sleep.active {
+            display: flex;
+        }
+
+        .sleep .zzz {
+            color: #1d2733;
+            font-size: 11px;
+            letter-spacing: 2px;
+        }
+
+        .side {
+            width: 96px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .dpad {
+            position: relative;
+            width: 92px;
+            height: 92px;
+        }
+
+        .key {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--on-3);
+            background: #11161a;
+            color: var(--on-2);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: .08s;
+            user-select: none;
+            touch-action: none;
+            -webkit-touch-callout: none;
+        }
+
+        .key:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #0a0e13;
+            color: var(--accent);
+        }
+
+        .key.up {
+            top: 0;
+            left: 31px;
+        }
+
+        .key.down {
+            bottom: 0;
+            left: 31px;
+        }
+
+        .key.left {
+            left: 0;
+            top: 31px;
+        }
+
+        .key.right {
+            right: 0;
+            top: 31px;
+        }
+
+        .key.ok {
+            top: 31px;
+            left: 31px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--on);
+            color: #000;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .side-hint {
+            font-size: 8px;
+            color: var(--muted-2);
+            text-align: center;
+            line-height: 1.5;
+            letter-spacing: .3px;
+        }
+
+        .side-hint b {
+            color: var(--muted);
+        }
+
+        .demo {
+            width: 464px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 12px 14px;
+        }
+
+        .demo h4 {
+            margin: 0 0 8px;
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: .5px;
+        }
+
+        .demo .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .demo button {
+            flex: 1 1 auto;
+            min-width: 70px;
+            padding: 8px 6px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: var(--panel-2);
+            color: var(--txt);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .demo button:hover {
+            border-color: var(--accent);
+        }
+
+        .legend {
+            width: 464px;
+            font-size: 11px;
+            color: var(--muted-2);
+            line-height: 1.7;
+        }
+
+        .legend b {
+            color: var(--muted);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 6px;
+            background: var(--panel-2);
+            color: var(--accent-2);
+            font-size: 10px;
+            border: 1px solid var(--line);
+        }
+    </style>
+    <script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
+    <script>
+        (function () {
+            try {
+                var beacon = new BeaconAction({
+                    appkey: '0WEB06U85YBSLJNL',
+                    versionCode: '1.0.0',
+                    channelID: 'share',
+                    delay: 1000,
+                    sessionDuration: 30 * 60 * 1000,
+                    isOversea: false,
+                    needReportRqdEvent: false
+                });
+                beacon.onDirectUserAction('preview_page_view', {
+                    'url': location.href,
+                    'referrer': document.referrer,
+                    'title': document.title,
+                    'sandbox_id': 'cf423347027f4542980f6840736710b6'
+                });
+            } catch (e) { }
+        })();
+    </script>
+</head>
+
+<body>
+    <div class="stage">
+        <div class="device">
+            <div class="brand-row"><span class="logo">GOLOHI</span><span class="unit">320×240 · 2.8″ TOUCH ·
+                    LANDSCAPE</span></div>
+            <div class="body">
+                <div class="screen">
+                    <div class="boot active" id="boot">
+                        <div class="b-logo">GOLOHI</div>
+                        <div class="b-bar"><i></i></div>
+                        <div style="font-size:9px;color:var(--muted-2);letter-spacing:2px;">INITIALIZING…</div>
+                    </div>
+                    <div class="sleep" id="sleep">
+                        <div class="zzz">● z z Z</div>
+                    </div>
+                    <div class="page active" id="home">
+                        <div class="statusbar">
+                            <span class="brand">GOLOHI</span>
+                            <span class="spacer"></span>
+                            <span class="bat-wrap"><span class="bat" id="batIcon"><i id="batFill"></i></span><span
+                                    id="batTxt">78%</span></span>
+                            <span class="chip" id="btChip"></span>
+                        </div>
+                        <div class="home-card-wrap">
+                            <div class="big-card mode" id="bigCard">
+                                <div class="bc-ico" id="bcIco"></div>
+                                <div class="bc-name" id="bcName">Jump</div>
+                            </div>
+                        </div>
+                        <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
+                    </div>
+                    <div class="overlay" id="ovModes">
+                        <div class="sheet">
+                            <h3>Workout Mode</h3>
+                            <div class="mode-say" id="modeSay"></div>
+                            <div class="mode-list" id="modeList"></div>
+                        </div>
+                    </div>
+                    <div class="page" id="diagram">
+                        <div class="diagram-box" id="diagBox"></div>
+                        <div class="diag-vals">
+                            <div class="diag-val"><span class="dv-ico">↔</span><span class="dv-num" id="dvDist">70–130
+                                    cm</span></div>
+                            <div class="diag-val"><span class="dv-ico" id="dvHighIco">▼</span><span class="dv-num"
+                                    id="dvHigh">0 cm</span></div>
+                        </div>
+                        <div class="diag-bar"><i id="diagBar"></i></div>
+                        <div class="skip" id="skipDiagram">Skip ›</div>
+                    </div>
+                    <div class="page" id="tilt">
+                        <div class="calib-center">
+                            <div class="cap">TILT</div>
+                            <div class="calib-ring" id="tiltRing">
+                                <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+                                    <circle class="ring-bg" cx="60" cy="60" r="54" />
+                                    <circle class="ring-fg" id="tiltRingFg" cx="60" cy="60" r="54" />
+                                </svg>
+                                <div class="calib-ico" id="tiltIco"><svg viewBox="0 0 100 100">
+                                        <line x1="26" y1="80" x2="74" y2="80" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" />
+                                        <line x1="50" y1="80" x2="50" y2="68" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" />
+                                        <g id="tiltSlab" transform="rotate(0 50 68)">
+                                            <rect x="34" y="56" width="32" height="13" rx="4" fill="none"
+                                                stroke="currentColor" stroke-width="3" />
+                                            <circle cx="50" cy="62.5" r="2.4" fill="currentColor" />
+                                        </g>
+                                        <path d="M64 80 A14 14 0 0 0 36 80" fill="none" stroke="currentColor"
+                                            stroke-width="2" opacity=".5" />
+                                    </svg></div>
+                                <div class="calib-check" id="tiltCheck">✓</div>
+                            </div>
+                            <div class="calib-warn" id="tiltWarn">
+                                <div class="cw-ico"><svg viewBox="0 0 100 100">
+                                        <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <line x1="16" y1="82" x2="84" y2="82" />
+                                            <g transform="rotate(-34 50 82)">
+                                                <rect x="35" y="36" width="30" height="44" rx="5" />
+                                                <line x1="50" y1="36" x2="50" y2="80" stroke-width="2" opacity=".35" />
+                                            </g>
+                                            <line x1="50" y1="26" x2="50" y2="82" stroke-width="2"
+                                                stroke-dasharray="5 5" opacity=".4" />
+                                            <path d="M50 82 L50 64 A18 18 0 0 0 67 76" stroke-width="2" opacity=".6" />
+                                        </g>
+                                        <path d="M74 20 L92 20 L83 37 Z" fill="currentColor" stroke="none" />
+                                        <rect x="81" y="24" width="4" height="7" rx="1.5" fill="#04070a" />
+                                        <rect x="81.5" y="33" width="3" height="3" rx="1" fill="#04070a" />
+                                    </svg></div>
+                                <div class="cw-cap">Tilt out of range</div>
+                                <div class="cw-hint">Adjust the stand — retrying…</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page" id="radar">
+                        <div class="calib-center">
+                            <div class="cap">POSITION</div>
+                            <div class="calib-ring" id="radarRing">
+                                <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+                                    <circle class="ring-bg" cx="60" cy="60" r="54" />
+                                    <circle class="ring-fg" id="radarRingFg" cx="60" cy="60" r="54" />
+                                </svg>
+                                <div class="calib-ico" id="radarIco"><svg viewBox="0 0 100 100">
+                                        <g fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="50" cy="50" r="42" opacity=".3" />
+                                            <circle cx="50" cy="50" r="30" opacity=".5" />
+                                            <circle cx="50" cy="50" r="18" opacity=".75" />
+                                        </g>
+                                        <g class="radar-sweep">
+                                            <path d="M50 50 L50 8 A42 42 0 0 1 84 24 Z" fill="currentColor"
+                                                opacity=".16" />
+                                        </g>
+                                        <g stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <circle cx="50" cy="42" r="6" />
+                                            <path d="M50 48 V64" />
+                                            <path d="M50 54 L38 46 M50 54 L62 46" />
+                                            <path d="M50 64 L42 80 M50 64 L58 80" />
+                                        </g>
+                                    </svg></div>
+                                <div class="calib-check" id="radarCheck">✓</div>
+                            </div>
+                            <div class="calib-warn" id="radarWarn">
+                                <div class="cw-ico"><svg viewBox="0 0 100 100">
+                                        <circle cx="66" cy="50" r="26" fill="none" stroke="currentColor"
+                                            stroke-width="3" stroke-dasharray="6 6" />
+                                        <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                            stroke-linejoin="round" transform="translate(-8 0)">
+                                            <circle cx="34" cy="38" r="7" />
+                                            <path d="M34 46 V64" />
+                                            <path d="M34 52 L22 44 M34 52 L46 44" />
+                                            <path d="M34 64 L26 80 M34 64 L42 80" />
+                                        </g>
+                                        <path d="M54 56 L72 50" fill="none" stroke="currentColor" stroke-width="3"
+                                            stroke-linecap="round" />
+                                        <path d="M72 50 L63 47 M72 50 L66 56" fill="none" stroke="currentColor"
+                                            stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg></div>
+                                <div class="cw-cap">Position not detected</div>
+                                <div class="cw-hint">Step into the zone — retrying…</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page" id="countdown">
+                        <div class="calib-center">
+                            <div class="countdown" id="cdNum">3</div>
+                            <div class="cap">Get ready</div>
+                        </div>
+                    </div>
+                    <div class="page" id="count">
+                        <div class="count-body">
+                            <div class="count-num" id="cNum">0</div>
+                            <div class="count-timer" id="cTimer">00:00</div>
+                            <div class="form-tip" id="cTip"></div>
+                        </div>
+                        <div class="count-actions">
+                            <button class="stop-btn pause" id="pauseBtn">❚❚ PAUSE</button>
+                            <button class="stop-btn" id="stopBtn">■ STOP</button>
+                        </div>
+                    </div>
+                    <div class="overlay" id="ovResult">
+                        <div class="sheet dialog">
+                            <div class="ico ok">✓</div>
+                            <h3>Complete</h3>
+                            <p id="resBody">Great job! 24 reps · 02:10</p>
+                            <div class="btn-2"><button class="btn-ghost" id="resSync">⇪ Sync</button><button
+                                    class="btn-primary" id="resDone">Done</button></div>
+                            <div class="hint" style="margin-top:7px;">Auto-home in 3s…</div>
+                        </div>
+                    </div>
+                    <div class="page" id="charging">
+                        <div class="charge-body">
+                            <div class="charge-anim"><i></i><span class="cv" id="chgCv">82%</span></div>
+                            <div class="cap" id="chargeLabel">CHARGING</div>
+                        </div>
+                    </div>
+                    <div class="page set-page" id="bright">
+                        <div class="set-center">
+                            <div class="set-icon">☀</div>
+                            <div class="set-big" id="brBig">3 / 4</div>
+                            <div class="set-bar" id="brBar"></div>
+                            <div class="set-step">
+                                <button class="step-btn" data-step="-1" aria-label="dim">−</button>
+                                <button class="step-btn" data-step="1" aria-label="brighten">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page set-page" id="vol">
+                        <div class="set-center">
+                            <div class="set-icon" id="volIco"></div>
+                            <div class="set-big" id="volBig">Mid</div>
+                            <div class="set-bar" id="volBar"></div>
+                            <div class="set-step">
+                                <button class="step-btn" data-step="-1" aria-label="quieter">−</button>
+                                <button class="step-btn" data-step="1" aria-label="louder">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page set-page" id="bt">
+                        <div class="set-center">
+                            <div class="cap" id="btCap">BLUETOOTH</div>
+                            <div class="calib-ring sm" id="btRing">
+                                <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+                                    <circle class="ring-bg" cx="60" cy="60" r="54" />
+                                    <circle class="ring-fg" id="btRingFg" cx="60" cy="60" r="54" />
+                                </svg>
+                                <div class="calib-ico" id="btIco"></div>
+                                <div class="calib-check" id="btCheck">✓</div>
+                            </div>
+                            <div class="set-big" id="btBig">OFF</div>
+                            <button class="bt-action" id="btAction">PAIR</button>
+                        </div>
+                    </div>
+                    <div class="overlay" id="ovExc">
+                        <div class="sheet dialog">
+                            <div class="ico warn" id="excIco">!</div>
+                            <h3 id="excTitle">Notice</h3>
+                            <p id="excMsg">Something needs your attention.</p>
+                            <div class="btn-2"><button class="btn-ghost" id="excRetry" style="display:none;">↻
+                                    Retry</button><button class="btn-primary" id="excOk">OK</button></div>
+                        </div>
+                    </div>
+                    <div class="overlay" id="ovPower">
+                        <div class="sheet dialog">
+                            <div class="ico warn">⏻</div>
+                            <h3>Power</h3>
+                            <p>Hold ● 3s power off · hold ● 10s force reboot · RESET pin.</p>
+                            <div class="btn-2"><button class="btn-ghost" id="powCancel">Cancel</button><button
+                                    class="btn-primary" id="powOk">Power Off</button></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="side">
+                    <div class="dpad">
+                        <div class="key up" data-key="up">▲</div>
+                        <div class="key left" data-key="left">◀</div>
+                        <div class="key ok" data-key="ok">●</div>
+                        <div class="key right" data-key="right">▶</div>
+                        <div class="key down" data-key="down">▼</div>
+                    </div>
+                    <div class="side-hint"><b>D-PAD</b> + OK<br>▲/▼ volume<br>◀/▶ mode<br>● confirm/sleep</div>
+                </div>
+            </div>
+        </div>
+        <div class="demo">
+            <h4>DEMO CONTROLS (device-triggered states)</h4>
+            <div class="row">
+                <button data-demo="boot">↻ Boot</button><button data-demo="home">Home</button>
+                <button data-demo="start">▶ Start</button><button data-demo="charging">⚡ Charge</button>
+                <button data-demo="sleep">☾ Sleep</button><button data-demo="low">⚠ Low Batt</button>
+                <button data-demo="sensor">⚙ Sensor</button><button data-demo="reboot">⏻ Force Reboot</button>
+                <button data-demo="tiltfail">⚠ Tilt Fail</button><button data-demo="radarfail">⚠ Radar Fail</button>
+                <button data-demo="sound">🔊 Sound</button><button data-demo="reset">⟲ Reset</button>
+            </div>
+        </div>
+        <div class="legend">
+            <b>Layout v3.2</b> · <span class="tag">320×240 landscape</span> · setup diagrams revised per install spec
+            sheet<br>
+            Jump/Jacks/Squats: floor stand <b>35° tilt-up · 70–130 cm in front</b> · Boxing: shoulder <b>1.2–1.5 m ·
+                vertical · 70–90 cm</b> · Push/Plank: <b>0 cm · horizontal · under chest</b>.
+        </div>
+    </div>
+
+    <script>
+        /* ---------- shared SVG bits ---------- */
+        const G = '#7fdcb6', ACC = '#4ee6a6', ACC2 = '#2a9e77';
+        const grd = '';
+
+        /* device on WALL / platform — vertical GameBoy slab, screen faces LEFT toward person */
+        function devWall(x, y, w, h) {
+            return `<g>
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#0c1812" stroke="${ACC}" stroke-width="1.4"/>
+    <rect x="${x + 2}" y="${y + 3}" width="${w - 4}" height="${h * 0.52}" rx="2" fill="${ACC}" opacity=".6"/>
+    <path d="M ${x + 5} ${y + h * 0.66} h6 M ${x + 8} ${y + h * 0.63} v6" stroke="${ACC2}" stroke-width="1.1" fill="none"/>
+    <circle cx="${x + w - 5}" cy="${y + h * 0.68}" r="1.8" fill="${ACC2}"/>
+    <circle cx="${x + w - 5}" cy="${y + h * 0.82}" r="1.8" fill="${ACC2}"/>
+    <rect x="${x - w * 0.24}" y="${y + 4}" width="${w * 0.24}" height="${h - 8}" rx="2" fill="#0b1118" stroke="#173328" stroke-width="1.2"/>
+  </g>`;
+        }
+        /* device on an ADJUSTABLE stand — thin GameBoy slab tilted BACK 'deg' above horizontal
+           (its BACK makes 'deg' with the ground), screen faces UP toward the person.
+           The open mouth on the person side reads 180°-deg (e.g. 145° at deg=35). */
+        function devTilt(cx, groundY, w, h, deg) {
+            const rad = deg * Math.PI / 180;
+            const ax = cx, ay = groundY;                                  // base rests on the floor
+            const rot = 90 - deg;                                         // vertical slab -> 'deg' above horizontal, top leans away
+            const body = `<g transform="translate(${ax} ${ay}) rotate(${rot})">
+      <rect x="${-w / 2}" y="${-h}" width="${w}" height="${h}" rx="4" fill="#0c1812" stroke="${ACC}" stroke-width="1.4"/>
+      <rect x="${-w / 2 + 2}" y="${-h + 3}" width="${w - 4}" height="${h * 0.52}" rx="2" fill="${ACC}" opacity=".55"/>
+      <path d="M ${-w / 2 + 5} ${-h * 0.34} h6 M ${-w / 2 + 8} ${-h * 0.37} v6" stroke="${ACC2}" stroke-width="1.1" fill="none"/>
+      <circle cx="${w / 2 - 5}" cy="${-h * 0.3}" r="1.8" fill="${ACC2}"/>
+      <circle cx="${w / 2 - 5}" cy="${-h * 0.18}" r="1.8" fill="${ACC2}"/>
+    </g>`;
+            // minimal stand: a short foot on the floor
+            const stand = `<line x1="${cx - 9}" y1="${groundY}" x2="${cx + 9}" y2="${groundY}" stroke="${ACC}" stroke-width="2.5" stroke-linecap="round" opacity=".9"/>`;
+            // 145° mouth on the PERSON side (left): arc from ground-left to device-axis (up-right)
+            const r = 18, ex = ax + Math.cos(rad) * r, ey = ay - Math.sin(rad) * r;
+            const wedge = `<path d="M ${ax} ${ay} L ${ax - r} ${ay} L ${ex} ${ey} Z" fill="${ACC}" opacity=".14"/>`
+                + `<line x1="${ax}" y1="${ay}" x2="${ax - r}" y2="${ay}" stroke="${ACC2}" stroke-width=".8"/>`
+                + `<line x1="${ax}" y1="${ay}" x2="${ex}" y2="${ey}" stroke="${ACC2}" stroke-width=".8"/>`;
+            return `<g>${stand}${body}${wedge}</g>`;
+        }
+        /* device flat on floor — thin GameBoy slab, screen faces UP */
+        function devFloor(x, y, w, h) {
+            return `<g>
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="#0c1812" stroke="${ACC}" stroke-width="1.4"/>
+    <rect x="${x + 2}" y="${y + 2}" width="${w - 4}" height="${h - 4}" rx="2" fill="${ACC}" opacity=".6"/>
+  </g>`;
+        }
+        const GROUND = `<line x1="8" y1="150" x2="296" y2="150" stroke="#173328" stroke-width="2"/>`;
+        const label = (x, y, t) => `<text x="${x}" y="${y}" fill="#3fbf90" font-size="9" font-family="'DotGothic16','Share Tech Mono',monospace">${t}</text>`;
+        const dimLine = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#2a9e77" stroke-width="1" stroke-dasharray="3 3"/>`;
+
+        /* human pose — cx is overall horizontal center */
+        function pose(type, cx) {
+            const P = `stroke="${G}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+            if (type === 'jump') return `<g ${P}><circle cx="${cx}" cy="86" r="6"/><path d="M ${cx} 92 V 112"/><path d="M ${cx} 98 L ${cx - 16} 84 M ${cx} 98 L ${cx + 16} 84"/><path d="M ${cx} 112 L ${cx - 12} 126 M ${cx} 112 L ${cx + 12} 126"/></g>`;
+            if (type === 'jacks') return `<g ${P}><circle cx="${cx}" cy="84" r="6"/><path d="M ${cx} 90 V 118"/><path d="M ${cx} 96 L ${cx - 20} 78 M ${cx} 96 L ${cx + 20} 78"/><path d="M ${cx} 118 L ${cx - 16} 142 M ${cx} 118 L ${cx + 16} 142"/></g>`;
+            if (type === 'boxing') return `<g ${P}><circle cx="${cx - 2}" cy="86" r="6"/><path d="M ${cx - 2} 92 V 116"/><path d="M ${cx - 2} 98 L ${cx - 18} 90 M ${cx - 2} 98 L ${cx + 22} 96"/><circle cx="${cx + 22}" cy="96" r="4" fill="${ACC}" stroke="none"/><path d="M ${cx - 2} 116 L ${cx - 12} 142 M ${cx - 2} 116 L ${cx + 12} 142"/></g>`;
+            if (type === 'squats') return `<g ${P}><circle cx="${cx}" cy="92" r="6"/><path d="M ${cx} 98 L ${cx} 120"/><path d="M ${cx} 104 L ${cx - 18} 110 M ${cx} 104 L ${cx + 18} 110"/><path d="M ${cx} 120 L ${cx - 16} 142 L ${cx - 16} 150 M ${cx} 120 L ${cx + 16} 120 L ${cx + 16} 150"/></g>`;
+            if (type === 'push') return `<g ${P}><circle cx="${cx - 26}" cy="126" r="5"/><path d="M ${cx - 26} 126 L ${cx + 18} 126"/><path d="M ${cx - 26} 126 L ${cx - 26} 140"/><path d="M ${cx + 18} 126 L ${cx + 34} 140"/></g>`;
+            if (type === 'plank') return `<g ${P}><circle cx="${cx - 26}" cy="130" r="5"/><path d="M ${cx - 26} 130 L ${cx + 20} 130"/><path d="M ${cx - 26} 130 L ${cx - 18} 140 L ${cx - 6} 140"/><path d="M ${cx + 20} 130 L ${cx + 34} 140"/></g>`;
+        }
+
+        /* ============== DIAGRAM per spec sheet ==============
+           Visual only (device + person + ground + tilt wedge + distance/height arrows);
+           the numeric DISTANCE and HEIGHT are shown as big chips below the diagram. */
+        function diagSVG(type) {
+            const open = `<svg viewBox="0 0 304 160" preserveAspectRatio="xMidYMid meet">${grd}`, close = '</svg>';
+            let b = '';
+            if (type === 'jump') {
+                b = GROUND + pose('jump', 80) + devTilt(244, 148, 18, 30, 35) + dimLine(86, 150, 244, 150);
+            } else if (type === 'jacks') {
+                b = GROUND + pose('jacks', 78) + devTilt(244, 148, 18, 30, 35) + dimLine(84, 150, 244, 150);
+            } else if (type === 'squats') {
+                b = GROUND + pose('squats', 80) + devTilt(244, 148, 18, 30, 35) + dimLine(86, 150, 244, 150);
+            } else if (type === 'boxing') {
+                // shoulder height 1.2–1.5 m, vertical; arm's length +5 cm (70–90 cm)
+                b = GROUND + pose('boxing', 90) + devWall(250, 82, 18, 30)
+                    + dimLine(102, 150, 250, 150) + dimLine(46, 150, 46, 97);
+            } else if (type === 'push') {
+                b = GROUND + devFloor(124, 142, 32, 9) + pose('push', 146);
+            } else if (type === 'plank') {
+                b = GROUND + devFloor(124, 142, 32, 9) + pose('plank', 146);
+            }
+            return open + b + close;
+        }
+
+        /* mode icons (clearer action silhouettes, 64×64 with ground line) */
+        function iconSVG(type) {
+            const P = `stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+            const gl = `<line x1="8" y1="58" x2="56" y2="58" stroke="#173328" stroke-width="2"/>`;
+            const h = (cx, cy) => `<circle cx="${cx}" cy="${cy}" r="5" ${P}/>`;
+            let b = '';
+            if (type === 'jump') b = `${gl}${h(32, 18)}<path d="M32 23V33" ${P}/><path d="M32 27L22 20M32 27L42 20" ${P}/><path d="M32 33L26 42M32 33L38 42" ${P}/>`;
+            if (type === 'jacks') b = `${gl}${h(32, 16)}<path d="M32 21V39" ${P}/><path d="M32 25L16 14M32 25L48 14" ${P}/><path d="M32 39L20 56M32 39L44 56" ${P}/>`;
+            if (type === 'boxing') b = `${gl}${h(30, 20)}<path d="M30 25V45" ${P}/><path d="M30 30L16 24M30 30L50 28" ${P}/><circle cx="50" cy="28" r="4" fill="currentColor" stroke="none"/><path d="M30 45L22 56M30 45L40 56" ${P}/>`;
+            if (type === 'squats') b = `${gl}${h(32, 24)}<path d="M32 29L32 44" ${P}/><path d="M32 34L18 40M32 34L46 40" ${P}/><path d="M32 44L22 56L22 58M32 44L42 52L42 58" ${P}/>`;
+            if (type === 'push') b = `${gl}${h(14, 42)}<path d="M14 42L42 42" ${P}/><path d="M14 42L14 58" ${P}/><path d="M42 42L52 58" ${P}/>`;
+            if (type === 'plank') b = `${gl}${h(14, 46)}<path d="M14 46L44 46" ${P}/><path d="M14 46L18 58L26 58" ${P}/><path d="M44 46L54 58" ${P}/>`;
+            return `<svg viewBox="0 0 64 64">${b}</svg>`;
+        }
+        const ICON = Object.fromEntries(['jump', 'jacks', 'boxing', 'squats', 'push', 'plank'].map(k => [k, iconSVG(k)]));
+
+        const MODES = [
+            { key: 'jump', name: 'Jump', sub: 'Jump in place', say: 'Jump', setup: 'Put the device on the floor in front of you, on its stand tilted up 35° toward your torso. Stand 70–130 cm away.', diag: 'jump' },
+            { key: 'jacks', name: 'Jumping Jacks', sub: 'Star jumps', say: 'Jumping Jacks', setup: 'Same floor stand · tilted up 35° · stand 70–130 cm away · keep full body in frame.', diag: 'jacks' },
+            { key: 'boxing', name: 'Boxing', sub: 'Straight punches', say: 'Boxing', setup: 'Device on platform or wall (magnetic), shoulder height 1.2–1.5 m, vertical. Stand arm’s length +5 cm (70–90 cm).', diag: 'boxing' },
+            { key: 'squats', name: 'Squats', sub: 'Bodyweight', say: 'Squats', setup: 'Put the device on the floor in front of you, on its stand tilted up 35° toward your torso. Stand 70–130 cm away.', diag: 'squats' },
+            { key: 'push', name: 'Push-ups', sub: 'On the floor', say: 'Push-ups', setup: 'Lay device flat on floor at 0 cm, horizontal, directly under your chest.', diag: 'push' },
+            { key: 'plank', name: 'Plank', sub: 'Hold the pose', say: 'Plank', setup: 'Lay device flat on floor at 0 cm, horizontal, directly under your chest.', diag: 'plank' }
+        ];
+        const VOLS = ['Mute', 'Low', 'Mid', 'High'];
+        /* setup diagram callouts: distance + install height, shown as big chips */
+        const DIAG = {
+            jump: { dist: '70–130 cm', dh: '▼', high: '0 cm' },
+            jacks: { dist: '70–130 cm', dh: '▼', high: '0 cm' },
+            squats: { dist: '70–130 cm', dh: '▼', high: '0 cm' },
+            boxing: { dist: '70–90 cm', dh: '▲', high: '1.2–1.5 m' },
+            push: { dist: '0 cm', dh: '▼', high: '0 cm' },
+            plank: { dist: '0 cm', dh: '▼', high: '0 cm' }
+        };
+
+        const S = {
+            screen: 'boot', popup: null, mode: 0, volume: 2, brightness: 3, bluetooth: 'off',
+            battery: 78, charging: false, card: 0, count: 0, timer: 0, countTimer: null, cdTimer: null, resultTimer: null, lastRep: 0, paused: false
+        };
+        /* home is a single large card shown one at a time; swipe-right (▶) / swipe-left (◀) to page */
+        const ICON_VOL = '<svg viewBox="0 0 64 64"><g fill="currentColor" stroke="none"><path d="M12 25 H20 L33 14 V50 L20 39 H12 Z"/></g><g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><path d="M42 25 a9 9 0 0 1 0 14"/><path d="M48 19 a16 16 0 0 1 0 26"/></g></svg>';
+        const ICON_BT = '<svg viewBox="0 0 64 64"><path d="M47.2 20.6 L32 5.3 H29.3 V25.6 L17.1 13.3 L13.3 17.1 L28.2 32 L13.3 46.9 L17.1 50.7 L29.3 38.4 V58.7 H32 L47.2 43.4 L35.8 32 L47.2 20.6 Z" fill="currentColor" stroke="none"/></svg>';
+        const CARDS = [{ kind: 'mode' }, { kind: 'set', page: 'bright', ico: '☀', name: 'BRIGHT' }, { kind: 'set', page: 'vol', ico: ICON_VOL, name: 'VOLUME' }, { kind: 'set', page: 'bt', ico: ICON_BT, name: 'BT' }];
+
+        /* ============== SOUND (Web Audio API, no asset files) ==============
+           Short UI feedback tones. Volume follows the device volume setting
+           (Mute/Low/Mid/High -> silent/low/mid/high). The AudioContext is
+           resumed on the first user gesture to satisfy the browser autoplay policy. */
+        const _AC = window.AudioContext || window.webkitAudioContext;
+        let _ac = null;
+        function ac() { if (!_AC) return null; if (!_ac) { try { _ac = new _AC(); } catch (e) { return null; } } if (_ac.state === 'suspended') { _ac.resume(); } return _ac; }
+        function _vol() { const v = [0, 0.16, 0.4, 0.7][S.volume]; return (v == null) ? 0 : v; }
+        function tone(freq, dur, type, when, rel, force) {
+            const a = ac(); if (!a) return; const v = force ? 0.5 : _vol(); if (v <= 0) return;
+            try {
+                const t0 = a.currentTime + (when || 0), pk = v * (rel == null ? 0.5 : rel);
+                const o = a.createOscillator(), g = a.createGain();
+                o.type = type || 'sine'; o.frequency.value = freq;
+                g.gain.setValueAtTime(0.0001, t0);
+                g.gain.linearRampToValueAtTime(pk, t0 + 0.008);
+                g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+                o.connect(g); g.connect(a.destination);
+                o.start(t0); o.stop(t0 + dur + 0.03);
+            } catch (e) { }
+        }
+        const sfx = {
+            click() { tone(660, 0.05, 'square', 0, 0.22); },
+            tick() { tone(900, 0.04, 'triangle', 0, 0.32); },
+            countdown() { tone(520, 0.12, 'sine', 0, 0.6); },
+            go() { tone(880, 0.3, 'sine', 0, 0.7); },
+            confirm() { tone(660, 0.12, 'sine', 0, 0.5); tone(990, 0.2, 'sine', 0.1, 0.5); },
+            complete() { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.25, 'sine', i * 0.12, 0.55)); },
+            error() { tone(170, 0.32, 'sawtooth', 0, 0.5); },
+            charge() { tone(440, 0.1, 'sine', 0, 0.5); tone(660, 0.16, 'sine', 0.09, 0.5); },
+            demo() { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.22, 'sine', i * 0.12, 0.5, true)); }
+        };
+
+        const $ = id => document.getElementById(id);
+        const show = (id, on) => $(id).classList.toggle('active', on);
+        function setScreen(name) { ['home', 'diagram', 'tilt', 'radar', 'countdown', 'count', 'charging', 'bright', 'vol', 'bt'].forEach(p => show(p, p === name)); S.screen = name; }
+        function setPopup(name) { ['ovModes', 'ovResult', 'ovExc', 'ovPower'].forEach(p => show(p, p === name)); S.popup = name; }
+        function say(text) { const e = $('modeSay'); if (!e) return; e.textContent = '“' + text + '”'; e.classList.add('show'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('show'), 1400); }
+
+        function renderStatus() {
+            $('batFill').style.width = S.battery + '%'; $('batIcon').classList.toggle('low', S.battery < 10); $('batTxt').textContent = S.battery + '%';
+            const t = S.bluetooth, lbl = t === 'off' ? 'BT' : (t === 'on' ? '✓' : (t === 'transfer' ? '↥' : '⟳')); $('btChip').className = 'chip' + (t !== 'off' ? ' on' : ''); $('btChip').innerHTML = ICON_BT + '<span>' + lbl + '</span>';
+        }
+        function renderCard() {
+            const c = CARDS[S.card];
+            const bc = $('bigCard');
+            if (c.kind === 'mode') { const m = MODES[S.mode]; $('bcIco').innerHTML = ICON[m.key]; $('bcName').textContent = m.name; }
+            else { $('bcIco').innerHTML = c.ico; $('bcName').textContent = c.name; }
+            const lock = c.kind === 'mode' && (S.charging || S.battery < 10);
+            bc.classList.toggle('mode', c.kind === 'mode');
+            bc.classList.toggle('locked', lock);
+            if (lock) $('bcName').textContent = S.charging ? 'LOCKED' : 'LOW BAT';
+            if ($('dots')) { const ds = $('dots').children; for (let i = 0; i < ds.length; i++) ds[i].classList.toggle('on', i === S.card); }
+        }
+        function activateCard() {
+            const c = CARDS[S.card];
+            if (c.kind === 'mode') { if (!(S.charging || S.battery < 10)) { renderModeList(); setPopup('ovModes'); } }
+            else { openSet(c.page); }
+        }
+        function renderHome() { renderStatus(); renderCard(); }
+        function renderModeList() {
+            const box = $('modeList'); box.innerHTML = '';
+            MODES.forEach((m, i) => {
+                const d = document.createElement('div'); d.className = 'mode-item' + (i === S.mode ? ' sel' : '');
+                d.innerHTML = `<div class="mi-ico">${ICON[m.key]}</div><div class="mi-name">${m.name}</div><div class="mi-desc">${m.sub}</div>`;
+                d.onclick = () => { S.mode = i; renderCard(); setPopup(null); startFlow(); }; box.appendChild(d);
+            });
+        }
+        function paintBar(el, lit) { for (let i = 0; i < el.children.length; i++) el.children[i].classList.toggle('on', i < lit); }
+        function renderBright() { buildBar($('brBar'), 4); paintBar($('brBar'), S.brightness); $('brBig').textContent = S.brightness + ' / 4'; }
+        function renderVol() { buildBar($('volBar'), 4); paintBar($('volBar'), S.volume); $('volBig').textContent = VOLS[S.volume]; }
+        /* BT sync page — state-driven: off -> pairing -> on(paired) -> transfer(upload) -> on
+           primary action (tap card / button / ●) = PAIR when off, UPLOAD when paired */
+        function renderBtPage() {
+            const t = S.bluetooth, ring = $('btRing'), big = $('btBig'), act = $('btAction'), ico = $('btIco');
+            ring.classList.remove('done', 'spin');
+            const fg = $('btRingFg'); fg.style.strokeDasharray = RING_LEN;
+            if (t === 'off') {
+                big.textContent = 'OFF'; big.className = 'set-big off';
+                ico.style.opacity = '.35'; fg.style.strokeDashoffset = RING_LEN;
+                act.textContent = 'PAIR'; act.disabled = false;
+            } else if (t === 'pairing') {
+                big.textContent = 'CONNECTING…'; big.className = 'set-big';
+                ico.style.opacity = '1'; ring.classList.add('spin'); fg.style.strokeDashoffset = RING_LEN * 0.7;
+                act.textContent = 'PAIRING…'; act.disabled = true;
+            } else if (t === 'on') {
+                big.textContent = 'PAIRED'; big.className = 'set-big';
+                ico.style.opacity = '1'; fg.style.strokeDashoffset = RING_LEN;
+                act.textContent = 'UPLOAD'; act.disabled = false;
+            } else if (t === 'transfer') {
+                big.textContent = 'UPLOADING…'; big.className = 'set-big';
+                ico.style.opacity = '1'; act.textContent = 'UPLOADING…'; act.disabled = true;
+            }
+            renderStatus();
+        }
+        function btPrimary() { if (S.bluetooth === 'off') startPair(); else if (S.bluetooth === 'on') startUpload(); }
+        function btDisconnect() { if (S.bluetooth === 'on') { S.bluetooth = 'off'; renderBtPage(); } }
+        function startPair() {
+            if (S.bluetooth !== 'off') return; S.bluetooth = 'pairing'; renderBtPage();
+            clearTimeout(S._pair); S._pair = setTimeout(() => { S.bluetooth = 'on'; renderBtPage(); }, 1600);
+        }
+        function startUpload() {
+            if (S.bluetooth === 'off') { raiseExc('warn', 'Bluetooth off', 'Pair your phone first, then upload.'); return; }
+            if (S.bluetooth !== 'on') return;
+            S.bluetooth = 'transfer'; renderBtPage();
+            const fg = $('btRingFg'); let p = 0; clearInterval(S._up);
+            S._up = setInterval(() => {
+                p = Math.min(100, p + Math.round(12 + Math.random() * 16)); fg.style.strokeDashoffset = RING_LEN * (1 - p / 100);
+                if (p >= 100) {
+                    clearInterval(S._up); S.bluetooth = 'on'; renderBtPage(); $('btRing').classList.add('done');
+                    raiseExc('ok', 'Uploaded', 'Workout synced to your phone.');
+                }
+            }, 140);
+        }
+        function openSet(p) { setScreen(p); if (p === 'bright') renderBright(); else if (p === 'vol') renderVol(); else renderBtPage(); }
+
+        function cycleMode(dir) { S.mode = (S.mode + dir + MODES.length) % MODES.length; renderCard(); say(MODES[S.mode].say); }
+        function changeVol(dir) { S.volume = Math.max(0, Math.min(3, S.volume + dir)); renderStatus(); renderVol(); }
+        function changeBright(dir) { S.brightness = Math.max(1, Math.min(4, S.brightness + dir)); renderStatus(); renderBright(); }
+        /* absolute setters (used by direct touch on the bar) */
+        function setVol(v) { S.volume = Math.max(0, Math.min(3, v)); renderStatus(); renderVol(); }
+        function setBright(v) { S.brightness = Math.max(1, Math.min(4, v)); renderStatus(); renderBright(); }
+        /* direct touch controls: tap/drag the bar to a level, +/- buttons step */
+        function bindSetTouch(barId, page, max, deltaFn, setFn) {
+            const bar = $(barId);
+            const lvl = x => { const r = bar.getBoundingClientRect(); const f = Math.max(0, Math.min(1, (x - r.left) / r.width)); return Math.max(1, Math.min(max, Math.round(f * max))); };
+            let drag = false;
+            bar.addEventListener('pointerdown', e => { drag = true; try { bar.setPointerCapture(e.pointerId); } catch (_) { } setFn(lvl(e.clientX)); });
+            bar.addEventListener('pointermove', e => { if (drag) setFn(lvl(e.clientX)); });
+            bar.addEventListener('pointerup', () => drag = false);
+            bar.addEventListener('pointercancel', () => drag = false);
+            document.querySelectorAll('#' + page + ' .step-btn').forEach(b => b.addEventListener('click', () => deltaFn(parseInt(b.dataset.step, 10))));
+        }
+
+        function startFlow() {
+            if (S.charging) { raiseExc('warn', 'Locked', 'Charging — unplug to start a workout.'); return; }
+            if (S.battery < 10) { raiseExc('warn', 'Low Battery', 'Battery <10%. Charge to start a workout.'); return; }
+            if (S.bluetooth === 'transfer') { raiseExc('warn', 'Busy', 'Bluetooth sync in progress.'); return; }
+            const m = MODES[S.mode]; $('diagBox').innerHTML = diagSVG(m.diag);
+            const d = DIAG[m.key]; $('dvDist').textContent = d.dist; $('dvHigh').textContent = d.high; $('dvHighIco').textContent = d.dh;
+            setScreen('diagram'); setPopup(null);
+            const bar = $('diagBar'); bar.style.transition = 'none'; bar.style.width = '0%';
+            requestAnimationFrame(() => { bar.style.transition = 'width 10s linear'; bar.style.width = '100%'; });
+            clearTimeout(S._skipT); S._skipT = setTimeout(goTilt, 10000);
+        }
+        function skipDiagram() { clearTimeout(S._skipT); goTilt(); }
+        /* expected stand angle per mode (deg from ground) */
+        function calibTarget() {
+            const k = MODES[S.mode].key;
+            if (k === 'boxing') return 90;            // vertical on wall
+            if (k === 'push' || k === 'plank') return 0;  // flat on floor
+            return 35;                              // jump / jacks / squats
+        }
+        /* segmented-bar helper for settings pages (U8g2 style) */
+        function buildBar(el, n) { el.innerHTML = ''; for (let i = 0; i < n; i++) { const s = document.createElement('i'); el.appendChild(s); } }
+        /* ring circumference for 54px-radius progress rings (2πr) */
+        const RING_LEN = 2 * Math.PI * 54;
+        /* TILT calibration — device auto-adjusts; icon tilts, ring fills as angle nears target.
+           PASS (stable within ±15° for 2s) → radar; FAIL (60s) → popup */
+        function goTilt() {
+            setScreen('tilt');
+            const target = calibTarget(); S.tiltDeg = 0; S._tiltStable = 0; S._tiltTicks = 0;
+            const fg = $('tiltRingFg');
+            fg.style.strokeDasharray = RING_LEN; fg.style.strokeDashoffset = RING_LEN;
+            $('tiltRing').classList.remove('done');
+            if ($('tiltSlab')) $('tiltSlab').setAttribute('transform', 'rotate(0 50 68)');
+            clearInterval(S._tiltSim);
+            S._tiltSim = setInterval(() => {
+                S._tiltTicks++;
+                S.tiltDeg = Math.max(0, Math.min(90, Math.round(S.tiltDeg + (target - S.tiltDeg) * 0.35 + (Math.random() * 4 - 2))));
+                // ring = how close the angle is to the target (1 at target, 0 when 90° off)
+                const prog = Math.max(0, Math.min(1, 1 - Math.abs(S.tiltDeg - target) / 90));
+                fg.style.strokeDashoffset = RING_LEN * (1 - prog);
+                if ($('tiltSlab')) $('tiltSlab').setAttribute('transform', `rotate(${S.tiltDeg} 50 68)`);
+                S._tiltStable = Math.abs(S.tiltDeg - target) <= 15 ? S._tiltStable + 120 : 0;
+                if (S._tiltStable >= 2000) { clearInterval(S._tiltSim); calibPass('tilt'); }
+                else if (S._tiltTicks * 120 >= 60000) { clearInterval(S._tiltSim); calibFail('tilt'); }
+            }, 120);
+        }
+        /* RADAR position calibration — person-silhouette + sweeping ring; ring fills to 100% → countdown.
+           PASS (locked 100%) → countdown; FAIL (60s) → popup */
+        function goRadar() {
+            setScreen('radar'); let p = 0; S._radarTicks = 0;
+            const fg = $('radarRingFg');
+            fg.style.strokeDasharray = RING_LEN; fg.style.strokeDashoffset = RING_LEN;
+            $('radarRing').classList.remove('done');
+            clearInterval(S._radarSim);
+            S._radarSim = setInterval(() => {
+                S._radarTicks++;
+                p = Math.min(100, p + Math.round(10 + Math.random() * 14));
+                fg.style.strokeDashoffset = RING_LEN * (1 - p / 100);
+                if (p >= 100) { clearInterval(S._radarSim); calibPass('radar'); }
+                else if (S._radarTicks * 140 >= 60000) { clearInterval(S._radarSim); calibFail('radar'); }
+            }, 140);
+        }
+        function calibPass(step) {
+            sfx.confirm();
+            if (step === 'tilt') { const r = $('tiltRing'); r.classList.add('done'); $('tiltRingFg').style.strokeDashoffset = 0; setTimeout(goRadar, 600); }
+            else { const r = $('radarRing'); r.classList.add('done'); $('radarRingFg').style.strokeDashoffset = 0; setTimeout(goCountdown, 600); }
+        }
+        function calibFail(step) {
+            clearInterval(S._tiltSim); clearInterval(S._radarSim);
+            const el = step === 'tilt' ? $('tiltWarn') : $('radarWarn');
+            if (el) el.classList.add('show');
+            clearTimeout(S._calibRetry);
+            S._calibRetry = setTimeout(() => { if (el) el.classList.remove('show'); if (step === 'tilt') goTilt(); else goRadar(); }, 3000);
+        }
+        function goCountdown() {
+            setScreen('countdown'); let n = 3; $('cdNum').textContent = n; sfx.countdown();
+            clearInterval(S.cdTimer); S.cdTimer = setInterval(() => { n--; if (n <= 0) { clearInterval(S.cdTimer); sfx.go(); goCount(); } else { $('cdNum').textContent = n; sfx.countdown(); } }, 1000);
+        }
+        function goCount() {
+            setScreen('count'); S.count = 0; S.timer = 0; S.paused = false; S.lastRep = Date.now();
+            $('cNum').textContent = '0'; $('cTimer').textContent = '00:00';
+            $('pauseBtn').textContent = '❚❚ PAUSE';
+            clearInterval(S.countTimer);
+            S.countTimer = setInterval(() => {
+                if (S.paused) return;                                    // freeze timer + reps while paused
+                S.timer++; const mm = String(Math.floor(S.timer / 60)).padStart(2, '0'), ss = String(S.timer % 60).padStart(2, '0');
+                $('cTimer').textContent = mm + ':' + ss;
+                const isCount = MODES[S.mode].key !== 'plank';
+                if (isCount && Math.random() < 0.55) { S.count++; S.lastRep = Date.now(); const el = $('cNum'); el.textContent = S.count; el.classList.add('bump'); sfx.tick(); setTimeout(() => el.classList.remove('bump'), 120); }
+                if (isCount && Date.now() - S.lastRep > 5000) { stopWorkout(); return; }
+                if (Math.random() < 0.18) showFormTip(isCount ? 'Keep form — full range' : 'Straight line — no sagging');
+            }, 1000);
+        }
+        function togglePause() {
+            S.paused = !S.paused; S.lastRep = Date.now();                 // reset idle clock on resume (no false stop)
+            $('pauseBtn').textContent = S.paused ? '▶ RESUME' : '❚❚ PAUSE';
+        }
+        function showFormTip(t) { const e = $('cTip'); e.textContent = t; e.classList.add('show'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('show'), 2600); }
+        function stopWorkout() {
+            clearInterval(S.countTimer); const m = MODES[S.mode];
+            $('resBody').textContent = m.key === 'plank' ? `Held ${$('cTimer').textContent} — nice core burn!` : `${S.count} reps · ${$('cTimer').textContent}`;
+            sfx.complete();
+            setPopup('ovResult'); clearTimeout(S.resultTimer); S.resultTimer = setTimeout(() => { setPopup(null); setScreen('home'); renderHome(); }, 3000);
+        }
+
+        function raiseExc(kind, title, msg, retry) {
+            $('excIco').className = 'ico ' + kind; $('excIco').textContent = kind === 'ok' ? '✓' : '❕'; $('excTitle').textContent = title; $('excMsg').textContent = msg;
+            if (kind === 'ok') sfx.confirm(); else sfx.error();
+            const rb = $('excRetry'); rb.style.display = retry ? '' : 'none'; if (retry) rb.onclick = () => { setPopup(null); retry(); };
+            setPopup('ovExc');
+        }
+        function lowBattery() { S.battery = 8; renderStatus(); renderHome(); if (S.charging) return; raiseExc('warn', 'Low Battery', 'Battery <10%. Workouts locked — charge soon.'); }
+        function sensorErr() { S.bluetooth = 'off'; renderStatus(); raiseExc('danger', 'Sensor Error', 'LIS3DH / radar self-check failed. Hold ● 10s or RESET pin.'); }
+
+        function powerOff() { setPopup(null); setScreen('home'); show('boot', false); show('sleep', false); document.querySelector('.screen').style.background = '#000'; setTimeout(() => { document.querySelector('.screen').style.background = ''; setScreen('home'); renderHome(); }, 400); }
+        function forceReboot() { setPopup(null); show('sleep', false); show('boot', true); setTimeout(() => { show('boot', false); setScreen('home'); renderHome(); }, 1600); }
+        function goSleep() { if (['count', 'charging'].includes(S.screen)) return; setPopup(null); show('sleep', true); }
+        function wake() { show('sleep', false); setScreen('home'); renderHome(); }
+        function goCharge() {
+            sfx.charge();
+            S.charging = true; S.battery = Math.max(S.battery, 82);
+            setScreen('charging'); setPopup(null); renderHome();
+            clearInterval(S._chg); let lvl = S.battery;
+            S._chg = setInterval(() => {
+                lvl = Math.min(100, lvl + 1);
+                $('chgCv').textContent = lvl + '%';
+                if (lvl >= 100) { clearInterval(S._chg); setTimeout(() => raiseExc('ok', 'Charged 100%', 'You may unplug now.'), 700); }
+            }, 60);
+        }
+        function stopCharge() { clearInterval(S._chg); S.charging = false; setScreen('home'); renderHome(); }
+
+        function onUp() {
+            if (S.popup) return;
+            if (S.screen === 'bright') { changeBright(1); }
+            else if (S.screen === 'vol') { changeVol(1); }
+            else if (S.screen === 'bt') { btDisconnect(); }
+        }
+        function onDown() {
+            if (S.popup) return;
+            if (S.screen === 'bright') { changeBright(-1); }
+            else if (S.screen === 'vol') { changeVol(-1); }
+            else if (S.screen === 'bt') { btDisconnect(); }
+        }
+        function onLeft() {
+            if (S.popup) { if (S.popup === 'ovModes') { cycleMode(-1); renderModeList(); } return; }
+            if (S.screen === 'home') { S.card = (S.card + 3) % 4; renderCard(); }
+            else if (S.screen === 'bt') { btDisconnect(); }
+        }
+        function onRight() {
+            if (S.popup) { if (S.popup === 'ovModes') { cycleMode(1); renderModeList(); } return; }
+            if (S.screen === 'home') { S.card = (S.card + 1) % 4; renderCard(); }
+            else if (S.screen === 'bt') { btDisconnect(); }
+        }
+        function onOk() {
+            if (S.popup === 'ovModes') { setPopup(null); startFlow(); return; }
+            if (S.popup === 'ovExc') { setPopup(null); if (S.screen !== 'home' && S.screen !== 'charging') { setScreen('home'); renderHome(); } return; }
+            if (S.popup === 'ovResult') { setPopup(null); setScreen('home'); renderHome(); return; }
+            if (S.popup === 'ovPower') return;
+            if ($('sleep').classList.contains('active')) { wake(); return; }
+            if (S.screen === 'tilt' && $('tiltWarn').classList.contains('show')) return;
+            if (S.screen === 'radar' && $('radarWarn').classList.contains('show')) return;
+            if (S.screen === 'home') { activateCard(); }
+            else if (['bright', 'vol', 'bt'].includes(S.screen)) { setScreen('home'); renderHome(); }
+            else if (S.screen === 'diagram') skipDiagram();
+            else if (S.screen === 'tilt') goRadar();
+            else if (S.screen === 'radar') goCountdown();
+            else if (S.screen === 'count') togglePause();
+        }
+        function holdOk() { if (S.screen === 'count') return; if ($('sleep').classList.contains('active')) { wake(); return; } setPopup('ovPower'); }
+
+        document.querySelectorAll('.key').forEach(k => k.addEventListener('click', () => { const key = k.dataset.key; sfx.click(); if (key === 'ok') { onOk(); return; } if (key === 'up') onUp(); if (key === 'down') onDown(); if (key === 'left') onLeft(); if (key === 'right') onRight(); }));
+        let lpTimer = null;
+        const okKey = document.querySelector('.key.ok');
+        okKey.addEventListener('pointerdown', () => { lpTimer = setTimeout(holdOk, 700); });
+        okKey.addEventListener('pointerup', () => clearTimeout(lpTimer));
+        okKey.addEventListener('pointerleave', () => clearTimeout(lpTimer));
+        okKey.addEventListener('pointercancel', () => clearTimeout(lpTimer));
+        document.addEventListener('keydown', e => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) e.preventDefault(); sfx.click();
+            if (e.key === 'ArrowUp') onUp(); else if (e.key === 'ArrowDown') onDown(); else if (e.key === 'ArrowLeft') onLeft(); else if (e.key === 'ArrowRight') onRight(); else if (e.key === 'Enter') onOk();
+        });
+        ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, () => ac(), { passive: true }));
+
+        /* touch swipe on the screen: right-swipe -> next card, left-swipe -> previous (home only) */
+        let _tx = null, _ty = null;
+        const _scr = document.querySelector('.screen');
+        _scr.addEventListener('touchstart', e => { const t = e.changedTouches[0]; _tx = t.clientX; _ty = t.clientY; }, { passive: true });
+        _scr.addEventListener('touchend', e => {
+            if (_tx === null) return;
+            const t = e.changedTouches[0]; const dx = t.clientX - _tx, dy = t.clientY - _ty;
+            if (S.screen === 'home' && !S.popup && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                S.card = dx < 0 ? (S.card + 1) % 4 : (S.card + 3) % 4; renderCard();
+            }
+            _tx = null;
+        }, { passive: true });
+
+        $('bigCard').onclick = activateCard;
+        $('ovModes').addEventListener('click', e => { if (e.target.id === 'ovModes') setPopup(null); });
+        $('sleep').onclick = wake;
+        $('btAction').onclick = btPrimary;
+        $('bt').addEventListener('click', e => { if (e.target.id === 'btAction') return; btPrimary(); });
+        $('skipDiagram').onclick = skipDiagram; $('pauseBtn').onclick = togglePause; $('stopBtn').onclick = stopWorkout;
+        $('resDone').onclick = () => { setPopup(null); setScreen('home'); renderHome(); };
+        $('resSync').onclick = () => { clearTimeout(S.resultTimer); setPopup(null); setScreen('bt'); renderBtPage(); if (S.bluetooth === 'off') startPair(); else startUpload(); };
+        $('excOk').onclick = () => { setPopup(null); if (S.screen !== 'home' && S.screen !== 'charging') { setScreen('home'); renderHome(); } };
+        $('powCancel').onclick = () => setPopup(null); $('powOk').onclick = powerOff;
+        bindSetTouch('brBar', 'bright', 4, changeBright, setBright);
+        bindSetTouch('volBar', 'vol', 3, changeVol, setVol);
+
+        document.querySelectorAll('.demo button').forEach(b => b.onclick = () => {
+            const d = b.dataset.demo;
+            if (d === 'boot') { show('sleep', false); setScreen('home'); show('boot', true); setTimeout(() => { show('boot', false); renderHome(); }, 2000); }
+            if (d === 'home') { show('boot', false); show('sleep', false); setScreen('home'); renderHome(); }
+            if (d === 'start') { show('boot', false); show('sleep', false); startFlow(); }
+            if (d === 'charging') goCharge(); if (d === 'sleep') goSleep(); if (d === 'low') lowBattery(); if (d === 'sensor') sensorErr(); if (d === 'reboot') forceReboot();
+            if (d === 'tiltfail') { show('boot', false); show('sleep', false); setScreen('tilt'); calibFail('tilt'); }
+            if (d === 'radarfail') { show('boot', false); show('sleep', false); setScreen('radar'); calibFail('radar'); }
+            if (d === 'reset') { S.charging = false; show('sleep', false); setScreen('home'); S.battery = 78; S.mode = 0; S.volume = 2; S.brightness = 3; S.bluetooth = 'off'; renderHome(); }
+            if (d === 'sound') sfx.demo();
+        });
+
+        $('volIco').innerHTML = ICON_VOL; $('btIco').innerHTML = ICON_BT;
+        renderHome(); setTimeout(() => { show('boot', false); setScreen('home'); renderHome(); }, 2000);
+    </script>
+</body>
+
+</html>
