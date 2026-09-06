@@ -12,6 +12,9 @@ typedef struct {
     lv_obj_t * page;
     lv_obj_t * card;
     lv_obj_t * card_name;
+    lv_obj_t * battery_body;
+    lv_obj_t * battery_fill;
+    lv_obj_t * battery_text;
     lv_obj_t * card_icons[APP_HOME_CARD_COUNT];
     lv_obj_t * dots[APP_HOME_CARD_COUNT];
     lv_point_t pointer_press_start;

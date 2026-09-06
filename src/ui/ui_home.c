@@ -166,13 +166,14 @@ static lv_obj_t * create_bluetooth_icon(lv_obj_t * parent)
     return icon;
 }
 
-static lv_obj_t * create_battery(lv_obj_t * parent)
+static lv_obj_t * create_battery(ui_home_t * home, lv_obj_t * parent)
 {
     lv_obj_t * battery = lv_obj_create(parent);
     make_plain(battery);
     lv_obj_set_size(battery, BATTERY_WRAP_WIDTH, BATTERY_HEIGHT);
 
     lv_obj_t * body = lv_obj_create(battery);
+    home->battery_body = body;
     make_plain(body);
     lv_obj_set_size(body, BATTERY_WIDTH, BATTERY_HEIGHT);
     lv_obj_set_style_border_color(body, ui_theme_color_muted(), LV_PART_MAIN);
@@ -180,6 +181,7 @@ static lv_obj_t * create_battery(lv_obj_t * parent)
     lv_obj_set_style_radius(body, 2, LV_PART_MAIN);
 
     lv_obj_t * fill = lv_obj_create(body);
+    home->battery_fill = fill;
     make_plain(fill);
     lv_obj_set_size(fill, BATTERY_FILL_WIDTH, 5);
     lv_obj_set_pos(fill, 2, 2);
@@ -198,7 +200,7 @@ static lv_obj_t * create_battery(lv_obj_t * parent)
     return battery;
 }
 
-static lv_obj_t * create_statusbar(lv_obj_t * parent)
+static lv_obj_t * create_statusbar(ui_home_t * home, lv_obj_t * parent)
 {
     lv_obj_t * statusbar = lv_obj_create(parent);
     ui_theme_apply_statusbar(statusbar);
@@ -224,9 +226,10 @@ static lv_obj_t * create_statusbar(lv_obj_t * parent)
                           LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(battery_wrap, 4, LV_PART_MAIN);
 
-    create_battery(battery_wrap);
+    create_battery(home, battery_wrap);
 
     lv_obj_t * battery_text = lv_label_create(battery_wrap);
+    home->battery_text = battery_text;
     lv_label_set_text(battery_text, "78%");
     lv_obj_set_style_text_color(battery_text, ui_theme_color_accent(), LV_PART_MAIN);
     lv_obj_set_style_text_font(battery_text, &lv_font_montserrat_12, LV_PART_MAIN);
@@ -390,7 +393,7 @@ void ui_home_create(ui_home_t * home, lv_obj_t * parent)
     lv_obj_set_flex_align(page, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER,
                           LV_FLEX_ALIGN_CENTER);
 
-    create_statusbar(page);
+    create_statusbar(home, page);
 
     lv_obj_t * card_wrap = lv_obj_create(page);
     make_plain(card_wrap);
@@ -422,10 +425,39 @@ void ui_home_render(ui_home_t * home, const app_state_t * state)
             mode = APP_WORKOUT_MODE_JUMP;
         }
         title = workout_mode_names[mode];
+        if(state->charging) title = "LOCKED";
+        else if(state->battery_percent < 10U) title = "LOW BAT";
     }
     lv_label_set_text(home->card_name, title);
     ui_theme_set_home_card_variant(home->card, home->card_name,
                                    presentation->is_workout);
+    if(card == APP_HOME_CARD_WORKOUT &&
+       (state->charging || state->battery_percent < 10U)) {
+        lv_obj_set_style_bg_color(home->card, lv_color_hex(0x101612), LV_PART_MAIN);
+        lv_obj_set_style_border_color(home->card, lv_color_hex(0x38443E), LV_PART_MAIN);
+        lv_obj_set_style_border_width(home->card, 1, LV_PART_MAIN);
+        lv_obj_set_style_text_color(home->card_name,
+                                    state->charging ? ui_theme_color_muted()
+                                                    : lv_color_hex(0xFFB14E),
+                                    LV_PART_MAIN);
+    }
+
+    char battery_text[8];
+    lv_snprintf(battery_text, sizeof(battery_text), "%u%%",
+                (unsigned int)state->battery_percent);
+    lv_label_set_text(home->battery_text, battery_text);
+    int32_t fill_width = (14 * state->battery_percent) / 100;
+    if(fill_width < 1 && state->battery_percent > 0U) fill_width = 1;
+    lv_obj_set_width(home->battery_fill, fill_width);
+    lv_color_t battery_color = state->battery_percent < 10U
+                                   ? lv_color_hex(0xFF695E)
+                                   : ui_theme_color_accent();
+    lv_obj_set_style_bg_color(home->battery_fill, battery_color, LV_PART_MAIN);
+    lv_obj_set_style_text_color(home->battery_text, battery_color, LV_PART_MAIN);
+    lv_obj_set_style_border_color(home->battery_body,
+                                  state->battery_percent < 10U
+                                      ? battery_color : ui_theme_color_muted(),
+                                  LV_PART_MAIN);
 
     for(uint32_t i = 0; i < APP_HOME_CARD_COUNT; ++i) {
         if(i == (uint32_t)card) {

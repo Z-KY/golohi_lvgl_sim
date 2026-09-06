@@ -11,7 +11,11 @@ enum {
     CALIBRATION_PASS_DELAY_MS = 600,
     CALIBRATION_RETRY_DELAY_MS = 3000,
     FORM_TIP_DURATION_MS = 2600,
-    RESULT_DURATION_MS = 3000
+    RESULT_DURATION_MS = 3000,
+    BOOT_DURATION_MS = 2000,
+    FORCE_REBOOT_DURATION_MS = 1600,
+    CHARGE_STEP_MS = 60,
+    CHARGED_NOTICE_DELAY_MS = 700
 };
 
 static bool mode_is_valid(app_workout_mode_t mode)
@@ -84,8 +88,10 @@ void app_state_init(app_state_t * state)
 {
     if(state == NULL) return;
     *state = (app_state_t){0};
-    state->screen = APP_SCREEN_HOME;
+    state->screen = APP_SCREEN_BOOT;
+    state->boot_duration_ms = BOOT_DURATION_MS;
     state->home_card = APP_HOME_CARD_WORKOUT;
+    state->battery_percent = 78;
     state->brightness = 3;
     state->volume = 2;
     state->bluetooth = APP_BT_OFF;
@@ -137,6 +143,7 @@ static bool tick_bluetooth(app_state_t * state, uint32_t elapsed_ms)
         state->bluetooth = APP_BT_ON;
         state->bt_progress = was_transfer ? 100U : 0U;
         state->bt_elapsed_ms = 0;
+        if(was_transfer) state->notice = APP_NOTICE_UPLOADED;
         return true;
     }
     state->bt_elapsed_ms += elapsed_ms;
@@ -273,7 +280,41 @@ bool app_state_tick(app_state_t * state, uint32_t elapsed_ms)
 {
     bool changed;
     if(state == NULL || elapsed_ms == 0U) return false;
+    if(state->screen == APP_SCREEN_BOOT) {
+        if(elapsed_ms >= state->boot_duration_ms - state->boot_elapsed_ms) {
+            state->boot_elapsed_ms = state->boot_duration_ms;
+            enter_home(state);
+            return true;
+        }
+        state->boot_elapsed_ms += elapsed_ms;
+        return true;
+    }
+    if(state->screen == APP_SCREEN_POWERED_OFF || state->screen == APP_SCREEN_SLEEP) {
+        return false;
+    }
     changed = tick_bluetooth(state, elapsed_ms);
+    if(state->screen == APP_SCREEN_CHARGING && state->charging) {
+        if(state->battery_percent < 100U) {
+            uint8_t old_percent = state->battery_percent;
+            state->charging_elapsed_ms += elapsed_ms;
+            while(state->charging_elapsed_ms >= CHARGE_STEP_MS &&
+                  state->battery_percent < 100U) {
+                state->charging_elapsed_ms -= CHARGE_STEP_MS;
+                ++state->battery_percent;
+            }
+            if(state->battery_percent == 100U) state->charged_elapsed_ms = 0;
+            changed = changed || old_percent != state->battery_percent;
+        }
+        else if(!state->charged_notice_shown) {
+            state->charged_elapsed_ms += elapsed_ms;
+            if(state->charged_elapsed_ms >= CHARGED_NOTICE_DELAY_MS) {
+                state->notice = APP_NOTICE_CHARGED;
+                state->charged_notice_shown = true;
+                changed = true;
+            }
+        }
+        return changed;
+    }
     switch(state->screen) {
         case APP_SCREEN_DIAGRAM: return tick_diagram(state, elapsed_ms) || changed;
         case APP_SCREEN_TILT: return tick_tilt(state, elapsed_ms) || changed;
@@ -369,10 +410,193 @@ void app_state_result_sync(app_state_t * state)
     app_state_bluetooth_primary(state);
 }
 
+static void clear_transient_state(app_state_t * state)
+{
+    state->notice = APP_NOTICE_NONE;
+    state->power_confirmation = false;
+    state->bt_elapsed_ms = 0;
+    state->diagram_elapsed_ms = 0;
+    state->diagram_progress = 0;
+    state->tilt_elapsed_ms = 0;
+    state->tilt_stable_ms = 0;
+    state->radar_elapsed_ms = 0;
+    state->calibration_phase_elapsed_ms = 0;
+    state->countdown_elapsed_ms = 0;
+    state->result_elapsed_ms = 0;
+    state->charging_elapsed_ms = 0;
+    state->charged_elapsed_ms = 0;
+    state->charged_notice_shown = false;
+    state->workout = (app_workout_session_t){0};
+    state->workout.mode = state->workout_mode;
+    if(state->bluetooth == APP_BT_PAIRING) state->bluetooth = APP_BT_OFF;
+    else if(state->bluetooth == APP_BT_TRANSFER) state->bluetooth = APP_BT_ON;
+}
+
+void app_state_notice_dismiss(app_state_t * state)
+{
+    if(state == NULL || state->notice == APP_NOTICE_NONE) return;
+    state->notice = APP_NOTICE_NONE;
+    if(state->screen != APP_SCREEN_HOME && state->screen != APP_SCREEN_CHARGING)
+        enter_home(state);
+}
+
+void app_state_device_boot(app_state_t * state)
+{
+    if(state == NULL) return;
+    clear_transient_state(state);
+    state->charging = false;
+    state->boot_elapsed_ms = 0;
+    state->boot_duration_ms = BOOT_DURATION_MS;
+    state->screen = APP_SCREEN_BOOT;
+}
+
+void app_state_device_home(app_state_t * state)
+{
+    if(state == NULL || state->screen == APP_SCREEN_POWERED_OFF) return;
+    state->notice = APP_NOTICE_NONE;
+    state->power_confirmation = false;
+    enter_home(state);
+}
+
+void app_state_device_start_workout(app_state_t * state)
+{
+    if(state == NULL || state->screen == APP_SCREEN_POWERED_OFF ||
+       state->charging || state->battery_percent < 10U) return;
+    state->notice = APP_NOTICE_NONE;
+    state->power_confirmation = false;
+    enter_diagram(state);
+}
+
+void app_state_device_set_battery(app_state_t * state, uint8_t percent)
+{
+    if(state == NULL) return;
+    state->battery_percent = percent > 100U ? 100U : percent;
+}
+
+void app_state_device_trigger_low_battery(app_state_t * state)
+{
+    if(state == NULL) return;
+    app_state_device_set_battery(state, 8U);
+    if(!state->charging) {
+        state->power_confirmation = false;
+        state->notice = APP_NOTICE_LOW_BATTERY;
+    }
+}
+
+void app_state_device_set_charging(app_state_t * state, bool charging)
+{
+    if(state == NULL) return;
+    state->notice = APP_NOTICE_NONE;
+    state->power_confirmation = false;
+    state->charging = charging;
+    state->charging_elapsed_ms = 0;
+    state->charged_elapsed_ms = 0;
+    state->charged_notice_shown = false;
+    if(charging) {
+        if(state->battery_percent < 82U) state->battery_percent = 82U;
+        state->screen = APP_SCREEN_CHARGING;
+    }
+    else {
+        enter_home(state);
+    }
+}
+
+void app_state_device_sleep(app_state_t * state)
+{
+    if(state == NULL || state->screen == APP_SCREEN_WORKOUT ||
+       state->screen == APP_SCREEN_CHARGING ||
+       state->screen == APP_SCREEN_POWERED_OFF) return;
+    state->notice = APP_NOTICE_NONE;
+    state->power_confirmation = false;
+    state->screen = APP_SCREEN_SLEEP;
+}
+
+void app_state_device_wake(app_state_t * state)
+{
+    if(state != NULL && state->screen == APP_SCREEN_SLEEP) enter_home(state);
+}
+
+void app_state_device_sensor_error(app_state_t * state)
+{
+    if(state == NULL || state->screen == APP_SCREEN_POWERED_OFF) return;
+    state->bluetooth = APP_BT_OFF;
+    state->bt_progress = 0;
+    state->bt_elapsed_ms = 0;
+    state->power_confirmation = false;
+    state->notice = APP_NOTICE_SENSOR_ERROR;
+}
+
+void app_state_device_force_reboot(app_state_t * state)
+{
+    if(state == NULL) return;
+    clear_transient_state(state);
+    state->charging = false;
+    state->boot_elapsed_ms = 0;
+    state->boot_duration_ms = FORCE_REBOOT_DURATION_MS;
+    state->screen = APP_SCREEN_BOOT;
+}
+
+void app_state_device_reset(app_state_t * state)
+{
+    if(state == NULL) return;
+    app_state_init(state);
+    state->screen = APP_SCREEN_HOME;
+    state->boot_elapsed_ms = 0;
+}
+
+void app_state_device_tilt_fail(app_state_t * state)
+{
+    if(state == NULL || state->screen == APP_SCREEN_POWERED_OFF) return;
+    enter_tilt(state);
+    state->tilt_state = APP_CALIBRATION_FAILED;
+}
+
+void app_state_device_radar_fail(app_state_t * state)
+{
+    if(state == NULL || state->screen == APP_SCREEN_POWERED_OFF) return;
+    enter_radar(state);
+    state->radar_state = APP_CALIBRATION_FAILED;
+}
+
+void app_state_power_request(app_state_t * state)
+{
+    if(state == NULL || state->screen == APP_SCREEN_POWERED_OFF ||
+       state->screen == APP_SCREEN_BOOT) return;
+    state->notice = APP_NOTICE_NONE;
+    state->power_confirmation = true;
+}
+
+void app_state_power_cancel(app_state_t * state)
+{
+    if(state != NULL) state->power_confirmation = false;
+}
+
+void app_state_power_off(app_state_t * state)
+{
+    if(state == NULL || !state->power_confirmation) return;
+    clear_transient_state(state);
+    state->charging = false;
+    state->screen = APP_SCREEN_POWERED_OFF;
+}
+
 void app_state_dispatch(app_state_t * state, ui_action_t action)
 {
     if(state == NULL) return;
-    if(state->screen < APP_SCREEN_HOME || state->screen > APP_SCREEN_RESULT) state->screen = APP_SCREEN_HOME;
+    if(state->screen < APP_SCREEN_HOME || state->screen > APP_SCREEN_POWERED_OFF) state->screen = APP_SCREEN_HOME;
+    if(state->screen == APP_SCREEN_POWERED_OFF || state->screen == APP_SCREEN_BOOT) return;
+    if(state->screen == APP_SCREEN_SLEEP) {
+        if(action == UI_ACTION_OK) app_state_device_wake(state);
+        return;
+    }
+    if(state->notice != APP_NOTICE_NONE) {
+        if(action == UI_ACTION_OK || action == UI_ACTION_BACK) app_state_notice_dismiss(state);
+        return;
+    }
+    if(state->power_confirmation) {
+        if(action == UI_ACTION_BACK) app_state_power_cancel(state);
+        return;
+    }
+    if(state->screen == APP_SCREEN_CHARGING) return;
 
     if(state->screen == APP_SCREEN_BRIGHTNESS) {
         if(action == UI_ACTION_UP && state->brightness < 4U) ++state->brightness;
@@ -458,6 +682,8 @@ void app_state_dispatch(app_state_t * state, ui_action_t action)
         static const app_screen_t card_screens[APP_HOME_CARD_COUNT] = {
             APP_SCREEN_MODE_SELECT, APP_SCREEN_BRIGHTNESS, APP_SCREEN_VOLUME, APP_SCREEN_BLUETOOTH
         };
+        if(state->home_card == APP_HOME_CARD_WORKOUT &&
+           (state->charging || state->battery_percent < 10U)) return;
         state->screen = card_screens[state->home_card];
         if(state->screen == APP_SCREEN_MODE_SELECT) state->workout_mode_selection = state->workout_mode;
     }

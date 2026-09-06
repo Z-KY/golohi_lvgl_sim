@@ -87,6 +87,8 @@ set(MAIN_SOURCES
     src/ui/ui_brightness.c
     src/ui/ui_countdown.c
     src/ui/ui_diagram.c
+    src/ui/ui_device_pages.c
+    src/ui/ui_dialog.c
     src/ui/ui_home.c
     src/ui/ui_mode_select.c
     src/ui/ui_radar.c

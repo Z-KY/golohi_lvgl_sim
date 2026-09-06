@@ -81,3 +81,21 @@ void app_result_sync(void)
 {
     app_state_result_sync(&app_state);
 }
+
+void app_notice_dismiss(void) { app_state_notice_dismiss(&app_state); }
+void app_device_boot(void) { app_state_device_boot(&app_state); }
+void app_device_home(void) { app_state_device_home(&app_state); }
+void app_device_start_workout(void) { app_state_device_start_workout(&app_state); }
+void app_device_set_battery(uint8_t percent) { app_state_device_set_battery(&app_state, percent); }
+void app_device_trigger_low_battery(void) { app_state_device_trigger_low_battery(&app_state); }
+void app_device_set_charging(bool charging) { app_state_device_set_charging(&app_state, charging); }
+void app_device_sleep(void) { app_state_device_sleep(&app_state); }
+void app_device_wake(void) { app_state_device_wake(&app_state); }
+void app_device_sensor_error(void) { app_state_device_sensor_error(&app_state); }
+void app_device_force_reboot(void) { app_state_device_force_reboot(&app_state); }
+void app_device_reset(void) { app_state_device_reset(&app_state); }
+void app_device_tilt_fail(void) { app_state_device_tilt_fail(&app_state); }
+void app_device_radar_fail(void) { app_state_device_radar_fail(&app_state); }
+void app_power_request(void) { app_state_power_request(&app_state); }
+void app_power_cancel(void) { app_state_power_cancel(&app_state); }
+void app_power_off(void) { app_state_power_off(&app_state); }

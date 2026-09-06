@@ -29,8 +29,20 @@ typedef enum {
     APP_SCREEN_RADAR,
     APP_SCREEN_COUNTDOWN,
     APP_SCREEN_WORKOUT,
-    APP_SCREEN_RESULT
+    APP_SCREEN_RESULT,
+    APP_SCREEN_BOOT,
+    APP_SCREEN_SLEEP,
+    APP_SCREEN_CHARGING,
+    APP_SCREEN_POWERED_OFF
 } app_screen_t;
+
+typedef enum {
+    APP_NOTICE_NONE = 0,
+    APP_NOTICE_UPLOADED,
+    APP_NOTICE_CHARGED,
+    APP_NOTICE_LOW_BATTERY,
+    APP_NOTICE_SENSOR_ERROR
+} app_notice_t;
 
 typedef enum {
     APP_BT_OFF = 0,
@@ -78,7 +90,11 @@ typedef struct {
 
 typedef struct {
     app_screen_t screen;
+    app_notice_t notice;
+    bool power_confirmation;
     app_home_card_t home_card;
+    uint8_t battery_percent;
+    bool charging;
     uint8_t brightness;
     uint8_t volume;
     app_bt_state_t bluetooth;
@@ -104,6 +120,11 @@ typedef struct {
     app_workout_session_t workout;
     app_workout_result_t result;
     uint32_t result_elapsed_ms;
+    uint32_t boot_elapsed_ms;
+    uint32_t boot_duration_ms;
+    uint32_t charging_elapsed_ms;
+    uint32_t charged_elapsed_ms;
+    bool charged_notice_shown;
 } app_state_t;
 
 void app_state_init(app_state_t * state);
@@ -123,6 +144,23 @@ void app_state_workout_set_form_tip(app_state_t * state,
 void app_state_workout_stop(app_state_t * state);
 void app_state_result_done(app_state_t * state);
 void app_state_result_sync(app_state_t * state);
+void app_state_notice_dismiss(app_state_t * state);
+void app_state_device_boot(app_state_t * state);
+void app_state_device_home(app_state_t * state);
+void app_state_device_start_workout(app_state_t * state);
+void app_state_device_set_battery(app_state_t * state, uint8_t percent);
+void app_state_device_trigger_low_battery(app_state_t * state);
+void app_state_device_set_charging(app_state_t * state, bool charging);
+void app_state_device_sleep(app_state_t * state);
+void app_state_device_wake(app_state_t * state);
+void app_state_device_sensor_error(app_state_t * state);
+void app_state_device_force_reboot(app_state_t * state);
+void app_state_device_reset(app_state_t * state);
+void app_state_device_tilt_fail(app_state_t * state);
+void app_state_device_radar_fail(app_state_t * state);
+void app_state_power_request(app_state_t * state);
+void app_state_power_cancel(app_state_t * state);
+void app_state_power_off(app_state_t * state);
 
 #ifdef __cplusplus
 } /* extern "C" */

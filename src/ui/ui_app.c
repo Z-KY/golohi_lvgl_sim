@@ -6,6 +6,8 @@
 #include "ui/ui_brightness.h"
 #include "ui/ui_countdown.h"
 #include "ui/ui_diagram.h"
+#include "ui/ui_device_pages.h"
+#include "ui/ui_dialog.h"
 #include "ui/ui_home.h"
 #include "ui/ui_mode_select.h"
 #include "ui/ui_radar.h"
@@ -26,6 +28,8 @@ static ui_radar_t radar;
 static ui_countdown_t countdown;
 static ui_workout_t workout;
 static ui_result_t result;
+static ui_device_pages_t device_pages;
+static ui_dialog_t dialog;
 static uint32_t last_app_tick;
 
 static void set_page_visible(lv_obj_t * page, bool visible)
@@ -67,6 +71,8 @@ void ui_app_init(void)
     ui_workout_create(&workout, screen);
     ui_result_create(&result, screen);
     ui_mode_select_create(&mode_select, screen);
+    ui_device_pages_create(&device_pages, screen);
+    ui_dialog_create(&dialog, screen);
 
     last_app_tick = lv_tick_get();
     lv_timer_create(app_tick_timer_cb, 40, NULL);
@@ -78,7 +84,7 @@ void ui_app_render(void)
     const app_state_t * state = app_get_state();
     app_screen_t screen = state->screen;
 
-    if(screen < APP_SCREEN_HOME || screen > APP_SCREEN_RESULT) {
+    if(screen < APP_SCREEN_HOME || screen > APP_SCREEN_POWERED_OFF) {
         screen = APP_SCREEN_HOME;
     }
 
@@ -94,6 +100,11 @@ void ui_app_render(void)
     set_page_visible(countdown.page, screen == APP_SCREEN_COUNTDOWN);
     set_page_visible(workout.page, screen == APP_SCREEN_WORKOUT);
     set_page_visible(result.page, screen == APP_SCREEN_RESULT);
+    set_page_visible(device_pages.boot_page, screen == APP_SCREEN_BOOT);
+    set_page_visible(device_pages.sleep_page, screen == APP_SCREEN_SLEEP);
+    set_page_visible(device_pages.charging_page, screen == APP_SCREEN_CHARGING);
+    set_page_visible(device_pages.powered_off_page,
+                     screen == APP_SCREEN_POWERED_OFF);
 
     if(screen == APP_SCREEN_HOME) {
         ui_home_render(&home, state);
@@ -128,4 +139,10 @@ void ui_app_render(void)
     else if(screen == APP_SCREEN_RESULT) {
         ui_result_render(&result, state);
     }
+    else if(screen == APP_SCREEN_BOOT || screen == APP_SCREEN_SLEEP ||
+            screen == APP_SCREEN_CHARGING ||
+            screen == APP_SCREEN_POWERED_OFF) {
+        ui_device_pages_render(&device_pages, state);
+    }
+    ui_dialog_render(&dialog, state);
 }
