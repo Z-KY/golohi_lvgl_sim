@@ -76,8 +76,26 @@ set(CONFIG_LV_USE_THORVG_INTERNAL OFF CACHE BOOL "Build internal ThorVG" FORCE)
 add_subdirectory(lvgl)
 target_include_directories(lvgl PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}> ${SDL2_INCLUDE_DIRS})
 
-set(MAIN_SOURCES src/mouse_cursor_icon.c src/hal/hal.c)
-# set(MAIN_LIBS lvgl lvgl::examples lvgl::demos lvgl::thorvg ${SDL2_LIBRARIES})
+set(MAIN_SOURCES
+    src/mouse_cursor_icon.c
+    src/hal/hal.c
+    src/app/app.c
+    src/app/app_state.c
+    src/ui/ui_app.c
+    src/ui/ui_back_button.c
+    src/ui/ui_bluetooth.c
+    src/ui/ui_brightness.c
+    src/ui/ui_countdown.c
+    src/ui/ui_diagram.c
+    src/ui/ui_home.c
+    src/ui/ui_mode_select.c
+    src/ui/ui_radar.c
+    src/ui/ui_result.c
+    src/ui/ui_theme.c
+    src/ui/ui_tilt.c
+    src/ui/ui_volume.c
+    src/ui/ui_workout.c
+)
 set(MAIN_LIBS lvgl ${SDL2_LIBRARIES})
 
 # Create the main executable, depending on the FreeRTOS option
@@ -151,6 +169,7 @@ endif()
 
 add_executable(main ${MAIN_SOURCES})
 target_compile_definitions(main PRIVATE LV_CONF_INCLUDE_SIMPLE)
+target_include_directories(main PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(main ${MAIN_LIBS})
 
 # On Windows, GUI applications do not show a console by default,

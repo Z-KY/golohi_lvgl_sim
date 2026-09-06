@@ -11,20 +11,16 @@
   #define _DEFAULT_SOURCE /* needed for usleep() */
 #endif
 
-#include <stdlib.h>
-#include <stdio.h>
 #ifdef _MSC_VER
   #include <Windows.h>
 #else
   #include <unistd.h>
-  #include <pthread.h>
 #endif
 #include "lvgl/lvgl.h"
-#include "lvgl/examples/lv_examples.h"
-#include "lvgl/demos/lv_demos.h"
-#include <SDL.h>
 
+#include "app/app.h"
 #include "hal/hal.h"
+#include "ui/ui_app.h"
 
 /*********************
  *      DEFINES
@@ -57,19 +53,13 @@ int main(int argc, char **argv)
   (void)argc; /*Unused*/
   (void)argv; /*Unused*/
 
-  /*Initialize LVGL*/
+  /* Initialize LVGL and the PC display/input platform. */
   lv_init();
+  sdl_hal_init(UI_APP_SCREEN_WIDTH, UI_APP_SCREEN_HEIGHT);
 
-  /*Initialize the HAL (display, input devices, tick) for LVGL*/
-  sdl_hal_init(320, 240);
-
-  /* Run the default demo */
-  /* To try a different demo or example, replace this with one of: */
-  /* - lv_demo_benchmark(); */
-  /* - lv_demo_stress(); */
-  /* - lv_example_label_1(); */
-  /* - etc. */
-  // lv_demo_widgets();
+  /* Initialize shared application state before creating the UI. */
+  app_init();
+  ui_app_init();
 
   while(1) {
     /* Periodically call the lv_task handler.
@@ -94,4 +84,3 @@ int main(int argc, char **argv)
 /**********************
  *   STATIC FUNCTIONS
  **********************/
-
