@@ -98,7 +98,8 @@ set(MAIN_SOURCES
     src/ui/ui_volume.c
     src/ui/ui_workout.c
 )
-set(MAIN_LIBS lvgl ${SDL2_LIBRARIES})
+# set(MAIN_LIBS lvgl ${SDL2_LIBRARIES})
+set(MAIN_LIBS lvgl SDL2::SDL2)
 
 # Create the main executable, depending on the FreeRTOS option
 if(USE_FREERTOS)
